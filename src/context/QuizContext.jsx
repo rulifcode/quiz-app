@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import { fetchQuestions } from "../services/quizApi"
 import { saveHistory } from "../utils/historyUtils"
+import { auth } from "../firebase"
+import { recordLeaderboardScore } from "../services/leaderboardService"
 
 const QuizContext = createContext()
 const QUIZ_STORAGE_KEY = "quiz_state"
@@ -13,6 +15,20 @@ const defaultState = {
   totalTime: 0,
   status: "idle",
   category: null,
+}
+
+const persistQuizResult = (quizState, correct) => {
+  saveHistory(quizState.category ?? "Random", correct, quizState.questions.length)
+
+  const currentUser = auth.currentUser
+  void recordLeaderboardScore({
+    user: currentUser,
+    score: correct,
+    total: quizState.questions.length,
+    category: quizState.category ?? "Random",
+  }).catch((error) => {
+    console.error("Gagal simpan leaderboard: QuizContext.jsx", error)
+  })
 }
 
 export const QuizProvider = ({ children }) => {
@@ -55,7 +71,7 @@ export const QuizProvider = ({ children }) => {
       const correct = newAnswers.filter(
         (a, i) => a === quizState.questions[i]?.correct_answer
       ).length
-      saveHistory(quizState.category ?? "Random", correct, quizState.questions.length)
+      persistQuizResult(quizState, correct)
     }
 
     setQuizState((prev) => ({
@@ -72,7 +88,7 @@ export const QuizProvider = ({ children }) => {
         const correct = prev.answers.filter(
           (a, i) => a === prev.questions[i]?.correct_answer
         ).length
-        saveHistory(prev.category ?? "Random", correct, prev.questions.length)
+        persistQuizResult(prev, correct)
         return { ...prev, timeLeft: 0, status: "finished" }
       }
       return { ...prev, timeLeft: prev.timeLeft - 1 }
@@ -91,4 +107,5 @@ export const QuizProvider = ({ children }) => {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useQuiz = () => useContext(QuizContext)

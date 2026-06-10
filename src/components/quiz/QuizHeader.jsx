@@ -1,24 +1,20 @@
 export default function QuizHeader() {
   return (
-    <div className="flex items-center justify-between px-6 py-5">
+    <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 sm:px-8">
       <div className="flex items-center gap-4">
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors">
+        <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6"/>
           </svg>
         </button>
         <div>
-          <h1 className="text-white font-bold text-lg leading-tight">Create New Quiz</h1>
-          <p className="text-gray-400 text-xs">Add questions, set answers and configure quiz settings</p>
+          <h1 className="text-lg font-black leading-tight tracking-tight text-slate-900">Quiz Session</h1>
+          <p className="text-xs text-slate-500">Answer each question before the timer runs out</p>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <button className="border border-white/20 text-white text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
-          Save Draft
-        </button>
-        <button className="bg-purple-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-          Preview
-        </button>
+      <div className="text-right">
+        <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Question mode</p>
+        <p className="mt-1 text-sm font-medium text-slate-700">One question per screen</p>
       </div>
     </div>
   )

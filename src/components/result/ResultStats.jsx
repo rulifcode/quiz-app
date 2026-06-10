@@ -6,19 +6,19 @@ export default function ResultStats({ correct, wrong, skipped, timeUsed }) {
   }
 
   const stats = [
-    { label: "Dijawab", value: correct + wrong, color: "text-indigo-500", bg: "bg-indigo-50" },
-    { label: "Benar", value: correct, color: "text-green-500", bg: "bg-green-50" },
-    { label: "Salah", value: wrong, color: "text-red-500", bg: "bg-red-50" },
-    { label: "Dilewati", value: skipped, color: "text-gray-400", bg: "bg-gray-50" },
-    { label: "Waktu", value: formatTime(timeUsed), color: "text-purple-500", bg: "bg-purple-50" },
+    { label: "Dijawab", value: correct + wrong },
+    { label: "Benar", value: correct },
+    { label: "Salah", value: wrong },
+    { label: "Dilewati", value: skipped },
+    { label: "Waktu", value: formatTime(timeUsed) },
   ]
 
   return (
-    <div className="grid grid-cols-5 gap-3 mb-6">
-      {stats.map(({ label, value, color, bg }) => (
-        <div key={label} className={`${bg} rounded-xl p-3 text-center`}>
-          <div className={`text-xl font-bold ${color}`}>{value}</div>
-          <div className="text-xs text-gray-400 mt-0.5">{label}</div>
+    <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+      {stats.map(({ label, value }) => (
+        <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+          <div className="text-xl font-black text-slate-900">{value}</div>
+          <div className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">{label}</div>
         </div>
       ))}
     </div>

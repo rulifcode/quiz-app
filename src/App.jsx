@@ -4,7 +4,6 @@ import { QuizProvider } from "./context/QuizContext"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import LandingPage from "./pages/LandingPage"
 import LoginPage from "./pages/LoginPage"
-import HomePage from "./pages/HomePage"
 import QuizPage from "./pages/QuizPage"
 import ResultPage from "./pages/ResultPage"
 
@@ -13,7 +12,6 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
       <Route path="/quiz" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/result" element={<ProtectedRoute><ResultPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
