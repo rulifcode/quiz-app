@@ -126,11 +126,12 @@ export default function LandingHero() {
         <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-slate-100 via-slate-100/60 to-transparent" />
 
         <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-4 py-14 sm:min-h-[680px] sm:px-6 lg:px-8">
-          <p className="text-sm font-semibold uppercase text-sky-200">React quiz app</p>
+          <p className="text-sm font-semibold uppercase text-sky-200">Online Quiz app</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Kuis cepat, bersih, dan bisa dilanjutkan kapan saja.
+            Asah Pengetahuanmu dengan Tantangan Interaktif.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-slate-100">
+            Quizzy adalah platform kuis modern yang dirancang untuk membantu Anda belajar, menguji kemampuan, dan meningkatkan wawasan melalui berbagai kategori pilihan. Nikmati pengalaman kuis yang interaktif, penilaian real-time, serta sistem leaderboard untuk mengukur pencapaian Anda,
             Login dengan Google, ambil soal langsung dari Open Trivia Database, jawab satu soal per layar, lalu lihat hasil pengerjaan secara ringkas.
           </p>
 
