@@ -1,177 +1,330 @@
 import { useEffect, useState } from "react"
+import {
+  ArrowRight,
+  BookOpenCheck,
+  Brain,
+  ChevronDown,
+  ChevronUp,
+  Clapperboard,
+  Clock3,
+  Dumbbell,
+  Globe,
+  Landmark,
+  Leaf,
+  ListChecks,
+  Monitor,
+  Play,
+  RotateCcw,
+  Shuffle,
+  Trophy,
+} from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { QUIZ_AMOUNT, QUIZ_CATEGORIES, QUIZ_DIFFICULTIES, QUIZ_DURATION_SECONDS } from "../../config/quizConfig"
 import { useAuth } from "../../context/AuthContext"
 import { useQuiz } from "../../context/QuizContext"
-import { ChevronDown, Play } from "lucide-react"
+import { fetchCategories } from "../../services/quizApi"
 import { subscribeLeaderboard } from "../../services/leaderboardService"
-import heroImage from "../../assets/hero.png"
+import heroImage from "../../assets/hero1.jpg"
+
+const formatDuration = (seconds) => `${Math.floor(seconds / 60)} menit`
+
+const CATEGORY_ICONS = {
+  Random: Shuffle,
+  "General Knowledge": Brain,
+  "Science & Nature": Leaf,
+  "Science: Computers": Monitor,
+  Geography: Globe,
+  History: Landmark,
+  Sports: Dumbbell,
+  Entertainment: Clapperboard,
+}
+
+const getCategoryIcon = (label) => {
+  if (CATEGORY_ICONS[label]) return CATEGORY_ICONS[label]
+  if (label.includes("Science: Computers") || label.includes("Gadgets")) return Monitor
+  if (label.includes("Science")) return Leaf
+  if (label.includes("Entertainment")) return Clapperboard
+  if (label.includes("Geography")) return Globe
+  if (label.includes("History") || label.includes("Politics")) return Landmark
+  if (label.includes("Sports")) return Dumbbell
+  if (label.includes("General")) return Brain
+  return BookOpenCheck
+}
+
+const difficultyText = (value) => QUIZ_DIFFICULTIES.find((item) => item.value === value)?.label ?? "Any Difficulty"
 
 export default function LandingHero() {
   const { user } = useAuth()
-  const { startQuiz } = useQuiz()
+  const { quizState, startQuiz } = useQuiz()
   const navigate = useNavigate()
   const [leaderboard, setLeaderboard] = useState([])
-  const [leaderboardLoading, setLeaderboardLoading] = useState(true)
+  const [categoryOptions, setCategoryOptions] = useState(QUIZ_CATEGORIES)
+  const [categoryLoadError, setCategoryLoadError] = useState(null)
+  const [selectedCategoryId, setSelectedCategoryId] = useState("random")
+  const [selectedDifficulty, setSelectedDifficulty] = useState(null)
+  const [startingCategory, setStartingCategory] = useState(null)
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const canResume = user && quizState.status === "active" && quizState.questions.length > 0
+  const selectedCategory =
+    categoryOptions.find((category) =>
+      selectedCategoryId === "random" ? category.categoryId === null : String(category.categoryId) === selectedCategoryId
+    ) ?? categoryOptions[0]
+  const hasMoreCategories = categoryOptions.length > 8
+  const displayedCategories = showAllCategories ? categoryOptions : categoryOptions.slice(0, 8)
 
   useEffect(() => {
-    const unsubscribe = subscribeLeaderboard((entries) => {
-      setLeaderboard(entries)
-      setLeaderboardLoading(false)
-    })
-
+    const unsubscribe = subscribeLeaderboard((entries) => setLeaderboard(entries), 5)
     return () => unsubscribe()
   }, [])
 
-  const handlePlayQuiz = async () => {
+  useEffect(() => {
+    let isMounted = true
+
+    fetchCategories()
+      .then((categories) => {
+        if (!isMounted) return
+        setCategoryOptions(categories)
+        setCategoryLoadError(null)
+      })
+      .catch((error) => {
+        if (!isMounted) return
+        console.error("Gagal mengambil kategori OpenTDB: - LandingHero.jsx:91", error)
+        setCategoryOptions(QUIZ_CATEGORIES)
+        setCategoryLoadError("Kategori API belum bisa dimuat, sementara memakai kategori bawaan.")
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const handleStart = async (category = selectedCategory, difficulty = selectedDifficulty) => {
     if (!user) {
       navigate("/login")
       return
     }
 
-    await startQuiz(null)
-    navigate("/quiz")
-  }
-
-  const scrollToCategories = () => {
-    const element = document.getElementById("categories")
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" })
+    const categoryLabel = category?.label ?? "Random"
+    setStartingCategory(categoryLabel)
+    try {
+      const didStart = await startQuiz({ category, difficulty })
+      if (didStart) navigate("/quiz")
+    } finally {
+      setStartingCategory(null)
     }
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-6 pb-10 sm:px-6 lg:px-8">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="rounded-[2.25rem] bg-[#3aa0ff] p-6 text-white shadow-[0_24px_60px_rgba(58,160,255,0.28)] sm:p-8 lg:p-10">
-          <div className="flex items-center justify-between text-sm font-medium text-white/85">
-            <span className="rounded-full bg-white/15 px-3 py-1">Quiz of the day</span>
-            <button
-              onClick={scrollToCategories}
-              className="hidden items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 transition-colors hover:bg-white/25 sm:flex"
-            >
-              Categories <ChevronDown size={14} />
-            </button>
-          </div>
+    <main>
+      <section className="relative isolate overflow-hidden bg-slate-950 text-white">
+        <img
+          src={heroImage}
+          alt="Quizzy hero"
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-slate-950/65" />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-slate-100 via-slate-100/60 to-transparent" />
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(240px,0.9fr)] lg:items-center">
-            <div>
-              <h1 className="max-w-xl text-5xl font-black leading-[0.95] tracking-tight sm:text-6xl xl:text-7xl">
-                Quiz of the Day
-              </h1>
-              <p className="mt-5 max-w-xl text-sm leading-7 text-white/90 sm:text-base">
-                Play a daily 10-question quiz, track your progress, and keep going with a clean, focused experience.
-              </p>
+        <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col justify-center px-4 py-14 sm:min-h-[680px] sm:px-6 lg:px-8">
+          <p className="text-sm font-semibold uppercase text-sky-200">React quiz app</p>
+          <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            Kuis cepat, bersih, dan bisa dilanjutkan kapan saja.
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-100">
+            Login dengan Google, ambil soal langsung dari Open Trivia Database, jawab satu soal per layar, lalu lihat hasil pengerjaan secara ringkas.
+          </p>
 
-              <div className="mt-6 flex flex-wrap items-center gap-6 text-sm text-white/85">
-                <span><strong className="text-white">Plays:</strong> 34</span>
-                <span><strong className="text-white">Avg:</strong> 6.20</span>
-                <span><strong className="text-white">10s:</strong> 1</span>
-              </div>
-
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            {canResume ? (
               <button
-                onClick={handlePlayQuiz}
-                className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#ffe15a] px-6 py-3.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-[#ffd83c]"
+                onClick={() => navigate("/quiz")}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-sky-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-950/20 transition-colors hover:bg-sky-400"
               >
-                <Play size={16} fill="currentColor" />
-                Play Now
+                <RotateCcw size={17} />
+                Resume Kuis
               </button>
-            </div>
-
-            <div className="relative mx-auto flex w-full max-w-90 items-center justify-center lg:max-w-none">
-              <div className="absolute inset-0 rounded-4xl bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_60%)] blur-2xl" />
-              <div className="relative overflow-hidden rounded-4xl bg-white/10 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.10)]">
-                <img
-                  src={heroImage}
-                  alt="Quiz illustration"
-                  className="h-full w-full rounded-3xl object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <aside className="rounded-4xl border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <h2 className="text-sm font-semibold text-slate-900">User Ranking</h2>
-            <span className="text-sm font-semibold text-slate-900">Quiz</span>
-          </div>
-          <div className="mt-4 space-y-3">
-            {leaderboardLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <div key={index} className="h-8 animate-pulse rounded-2xl bg-slate-100" />
-                ))}
-              </div>
-            ) : leaderboard.length ? (
-              leaderboard.map((entry, index) => (
-                <div key={entry.id} className="flex items-center justify-between text-sm">
-                  <div className="flex min-w-0 items-center gap-2 text-slate-700">
-                    <span className="w-4 text-center text-xs font-semibold text-slate-500">{index + 1}</span>
-                    <img
-                      src={entry.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.displayName || "Q")}&background=2f9df4&color=fff`}
-                      alt={entry.displayName || "Player"}
-                      className="h-5 w-5 rounded-full object-cover"
-                    />
-                    <span className="truncate">{entry.displayName || "Quiz Player"}</span>
-                  </div>
-                  <span className="font-semibold text-[#3aa0ff]">{entry.totalScore || 0}</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-slate-500">Belum ada skor. Login dan selesaikan kuis untuk muncul di ranking.</p>
-            )}
-          </div>
-        </aside>
-      </div>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_300px]">
-        <article className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-          <h3 className="text-2xl font-semibold text-slate-900">Today's Most Popular Quiz</h3>
-          <p className="mt-2 text-sm text-slate-600">Name the 20 most spoken languages</p>
-          <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">Guess the world's 20 most spoken languages.</p>
-          <button className="mt-6 rounded-full bg-[#ffe15a] px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-[#ffd83c]">
-            Play Now
-          </button>
-        </article>
-
-        <article className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-          <h3 className="text-2xl font-semibold text-slate-900">New Game Trivia Sprint</h3>
-          <p className="mt-2 text-sm text-slate-600">Fast challenge with a fixed answer time and no retries.</p>
-          <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">Answer many questions in 20 seconds, earn extra time for correct answers.</p>
-          <button className="mt-6 rounded-full bg-[#ffe15a] px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-[#ffd83c]">
-            Play Now
-          </button>
-        </article>
-
-        <article className="rounded-[1.75rem] bg-[#ffe15a] p-6 shadow-[0_18px_40px_rgba(255,225,90,0.32)]">
-          <h3 className="text-2xl font-semibold text-slate-900">Never Miss the Quiz of the Day!</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-800">Get your daily dose of quiz fun straight to your inbox.</p>
-          <button className="mt-6 rounded-full bg-[#2f9df4] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#228fee]">
-            Subscribe Now!
-          </button>
-        </article>
-      </div>
-
-      <section id="categories" className="mt-10">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Categories</h2>
-        <div className="flex flex-wrap gap-3">
-          {[
-            "Geography",
-            "History",
-            "Science",
-            "Entertainment",
-            "Literature & Words",
-            "Sports",
-            "General Knowledge",
-            "Math & Logic",
-            "Tech & Internet",
-          ].map((item) => (
-            <button key={item} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50">
-              {item}
+            ) : null}
+            <button
+              onClick={() => handleStart()}
+              disabled={Boolean(startingCategory)}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-slate-950/20 transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-70"
+            >
+              <Play size={17} />
+              {startingCategory ? "Memuat soal..." : "Mulai Quiz"}
             </button>
-          ))}
+            <button
+              onClick={() => document.getElementById("categories")?.scrollIntoView({ behavior: "smooth" })}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/15"
+            >
+              Pilih Kategori
+              <ArrowRight size={17} />
+            </button>
+          </div>
+
+          {quizState.error ? (
+            <p className="mt-4 rounded-md border border-rose-200/50 bg-rose-950/50 px-4 py-3 text-sm text-rose-50 backdrop-blur">
+              {quizState.error}
+            </p>
+          ) : null}
+
+          <div className="mt-6 grid max-w-3xl gap-3 rounded-lg border border-white/15 bg-white/15 p-3 shadow-xl shadow-slate-950/20 backdrop-blur-xl sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto] sm:items-end">
+            <label className="min-w-0">
+              <span className="mb-2 block text-xs font-semibold uppercase text-slate-200">Kategori</span>
+              <select
+                value={selectedCategoryId}
+                onChange={(event) => setSelectedCategoryId(event.target.value)}
+                className="h-11 w-full rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition-colors focus:border-sky-300"
+              >
+                {categoryOptions.map((category) => (
+                  <option key={category.categoryId ?? "random"} value={category.categoryId ?? "random"}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="min-w-0">
+              <span className="mb-2 block text-xs font-semibold uppercase text-slate-200">Level</span>
+              <select
+                value={selectedDifficulty ?? "any"}
+                onChange={(event) => setSelectedDifficulty(event.target.value === "any" ? null : event.target.value)}
+                className="h-11 w-full rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition-colors focus:border-sky-300"
+              >
+                {QUIZ_DIFFICULTIES.map((difficulty) => (
+                  <option key={difficulty.value ?? "any"} value={difficulty.value ?? "any"}>
+                    {difficulty.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button
+              onClick={() => handleStart()}
+              disabled={Boolean(startingCategory)}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-sky-500 px-5 text-sm font-semibold text-white shadow-lg shadow-sky-950/20 transition-colors hover:bg-sky-400 disabled:cursor-wait disabled:opacity-70"
+            >
+              <Play size={16} />
+              Start
+            </button>
+          </div>
+
+          {categoryLoadError ? (
+            <p className="mt-3 max-w-3xl text-xs leading-5 text-slate-200">{categoryLoadError}</p>
+          ) : null}
+
+          <div id="features" className="mt-9 grid gap-3 sm:grid-cols-3 lg:max-w-3xl">
+            {[
+              { icon: ListChecks, value: QUIZ_AMOUNT, label: "Total soal" },
+              { icon: Clock3, value: formatDuration(QUIZ_DURATION_SECONDS), label: "Timer" },
+              { icon: RotateCcw, value: "Auto", label: "Resume session" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-lg border border-white/15 bg-white/15 p-4 shadow-lg shadow-slate-950/10 backdrop-blur-xl">
+                <item.icon className="h-5 w-5 text-sky-200" />
+                <p className="mt-3 text-xl font-semibold">{item.value}</p>
+                <p className="mt-1 text-sm text-slate-200">{item.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
-    </section>
+
+      <section id="categories" className="border-y border-slate-200 bg-slate-100">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase text-sky-700">Kategori</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Pilih topik kuis</h2>
+            </div>
+            <p className="max-w-xl text-sm leading-6 text-slate-500">
+              Kategori dimuat dari OpenTDB, level mengikuti pilihan API: Easy, Medium, atau Hard.
+            </p>
+          </div>
+
+          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {displayedCategories.map((category) => {
+              const Icon = getCategoryIcon(category.label)
+              const isStarting = startingCategory === category.label
+              const selectedLevelLabel = difficultyText(selectedDifficulty)
+
+              return (
+                <article key={category.categoryId ?? "random"} className="group flex min-h-56 flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-sky-200 hover:shadow-lg hover:shadow-slate-200/70">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-md bg-sky-50 text-sky-700 ring-1 ring-sky-100 transition-colors group-hover:bg-sky-600 group-hover:text-white">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="mt-5 font-semibold text-slate-950">{category.label}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">{category.description}</p>
+                  <p className="mt-3 text-xs font-semibold uppercase text-slate-400">{selectedLevelLabel}</p>
+                  <button
+                    onClick={() => handleStart(category, selectedDifficulty)}
+                    disabled={Boolean(startingCategory)}
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-wait disabled:opacity-70"
+                  >
+                    {isStarting ? "Memuat..." : "Mulai"}
+                    <ArrowRight size={16} />
+                  </button>
+                </article>
+              )
+            })}
+          </div>
+
+          {hasMoreCategories ? (
+            <div className="mt-7 flex justify-center">
+              <button
+                onClick={() => setShowAllCategories((value) => !value)}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-sky-200 hover:text-sky-700 hover:shadow-md"
+              >
+                {showAllCategories ? (
+                  <>
+                    Show Less
+                    <ChevronUp size={17} />
+                  </>
+                ) : (
+                  <>
+                    See All
+                    <ChevronDown size={17} />
+                  </>
+                )}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <section id="leaderboard" className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
+        <div>
+          <p className="text-sm font-semibold uppercase text-sky-700">Leaderboard</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Ranking pengguna</h2>
+          <p className="mt-3 text-sm leading-7 text-slate-600">
+            Skor pengguna login akan masuk ke Firestore setelah kuis selesai. Riwayat pribadi tetap tersimpan di browser.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          {leaderboard.length ? (
+            <div className="divide-y divide-slate-100">
+              {leaderboard.map((entry, index) => (
+                <div key={entry.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-sm font-semibold text-slate-700">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-950">{entry.displayName || "Quiz Player"}</p>
+                      <p className="text-xs text-slate-500">{entry.quizzesTaken || 0} attempt</p>
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-sky-700">
+                    <Trophy size={16} />
+                    {entry.totalScore || 0}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">Belum ada skor leaderboard.</p>
+          )}
+        </div>
+      </section>
+    </main>
   )
 }

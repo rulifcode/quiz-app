@@ -1,30 +1,30 @@
 import { decodeHTML } from "../../utils/decode"
 
-export default function QuizOptions({ options, selected, onSelect }) {
+export default function QuizOptions({ disabled, options, selected, onSelect }) {
   return (
-    <div className="mt-4 rounded-4xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:p-6">
-      <p className="mb-4 text-xs uppercase tracking-[0.25em] text-slate-500">Answer options</p>
-      <div className="flex flex-col gap-3">
+    <div className="p-5 sm:p-6">
+      <p className="mb-4 text-xs font-semibold uppercase text-slate-500">Pilih jawaban</p>
+      <div className="grid gap-3">
         {options.map((option, i) => {
           const isSelected = selected === option
           return (
             <button
               key={i}
+              type="button"
               onClick={() => onSelect(option)}
-              className={`flex items-center gap-3 rounded-2xl border px-4 py-4 text-left text-sm transition-all ${
+              disabled={disabled}
+              className={`flex min-h-14 items-center gap-3 rounded-md border px-4 py-3 text-left text-sm font-medium transition-all ${
                 isSelected
-                  ? "border-[#2f9df4] bg-[#2f9df4]/8 text-slate-900 shadow-[0_10px_24px_rgba(47,157,244,0.10)]"
-                  : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
+                  ? "border-sky-600 bg-sky-50 text-sky-950 ring-2 ring-sky-100"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50/40"
               }`}
             >
-              <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                isSelected ? "border-[#2f9df4]" : "border-slate-300"
+              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs font-semibold ${
+                isSelected ? "border-sky-600 bg-sky-600 text-white" : "border-slate-200 bg-slate-50 text-slate-500"
               }`}>
-                {isSelected && (
-                  <div className="h-2.5 w-2.5 rounded-full bg-[#2f9df4]" />
-                )}
-              </div>
-              {decodeHTML(option)}
+                {String.fromCharCode(65 + i)}
+              </span>
+              <span className="min-w-0 flex-1">{decodeHTML(option)}</span>
             </button>
           )
         })}

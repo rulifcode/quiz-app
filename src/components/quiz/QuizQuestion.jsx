@@ -1,22 +1,29 @@
 import { decodeHTML } from "../../utils/decode"
 
-export default function QuizQuestion({ question, index, total }) {
+const formatLabel = (value) => {
+  if (!value) return "-"
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+export default function QuizQuestion({ category, difficulty, question, index, total, type }) {
   return (
-    <div className="mx-0 rounded-4xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] sm:p-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Question</p>
-          <span className="mt-2 block text-sm font-semibold text-slate-900">
-            {index + 1} / {total}
-          </span>
+    <div className="border-b border-slate-200 p-5 sm:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase text-slate-500">Question {index + 1} / {total}</p>
+          <p className="mt-2 text-sm text-slate-500">{decodeHTML(category)}</p>
         </div>
-        <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-          Multiple choice
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+            {formatLabel(type)}
+          </span>
+          <span className="rounded-md bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
+            {formatLabel(difficulty)}
+          </span>
         </div>
       </div>
 
-      <p className="mb-2 text-xs uppercase tracking-[0.25em] text-slate-500">Question Text</p>
-      <div className="min-h-18 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-relaxed text-slate-900">
+      <div className="mt-5 text-xl font-semibold leading-relaxed text-slate-950 sm:text-2xl">
         {decodeHTML(question)}
       </div>
     </div>

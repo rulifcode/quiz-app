@@ -14,11 +14,11 @@ export default function ResultStats({ correct, wrong, skipped, timeUsed }) {
   ]
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
       {stats.map(({ label, value }) => (
-        <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
-          <div className="text-xl font-black text-slate-900">{value}</div>
-          <div className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">{label}</div>
+        <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="text-xl font-semibold text-slate-950">{value}</div>
+          <div className="mt-1 text-xs font-medium uppercase text-slate-500">{label}</div>
         </div>
       ))}
     </div>

@@ -3,7 +3,7 @@ export default function LoginForm({ onLogin, isLoading }) {
     <button
       onClick={onLogin}
       disabled={isLoading}
-      className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-12 w-full items-center justify-center gap-3 rounded-md bg-slate-950 px-4 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -13,7 +13,7 @@ export default function LoginForm({ onLogin, isLoading }) {
         <path fill="none" d="M0 0h48v48H0z"/>
       </svg>
       <span>
-        {isLoading ? "Memuat..." : "Masuk dengan Google"}
+        {isLoading ? "Menghubungkan..." : "Masuk dengan Google"}
       </span>
     </button>
   )

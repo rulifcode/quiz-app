@@ -12,9 +12,9 @@ export default function QuizPage() {
     <QuizSessionContent
       key={session.currentIndex}
       answerQuestion={session.answerQuestion}
+      answeredCount={session.answeredCount}
       currentIndex={session.currentIndex}
       currentQuestion={session.currentQuestion}
-      isLastQuestion={session.isLastQuestion}
       questions={session.questions}
       timeLeft={session.timeLeft}
     />

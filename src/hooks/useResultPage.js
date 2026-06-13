@@ -10,16 +10,16 @@ export default function useResultPage() {
   const navigate = useNavigate()
   const [leaderboard, setLeaderboard] = useState([])
 
-  const { questions, answers, timeLeft } = quizState
+  const { questions, answers, timeLeft, totalTime } = quizState
 
   const summary = useMemo(() => {
     const correct = questions.filter((q, i) => answers[i] === q.correct_answer).length
     const wrong = questions.filter((q, i) => answers[i] !== undefined && answers[i] !== q.correct_answer).length
     const skipped = questions.filter((q, i) => answers[i] === undefined).length
-    const timeUsed = 600 - timeLeft
+    const timeUsed = Math.max(0, (totalTime || 0) - timeLeft)
 
     return { correct, wrong, skipped, timeUsed }
-  }, [answers, questions, timeLeft])
+  }, [answers, questions, timeLeft, totalTime])
 
   useEffect(() => {
     const unsubscribe = subscribeLeaderboard((entries) => {
@@ -35,9 +35,15 @@ export default function useResultPage() {
   }
 
   const handleRetry = async () => {
+    const retrySettings = {
+      category: quizState.categoryId
+        ? { label: quizState.category, categoryId: quizState.categoryId }
+        : null,
+      difficulty: quizState.difficulty ?? null,
+    }
     resetQuiz()
-    await startQuiz(null)
-    navigate("/quiz", { replace: true })
+    const didStart = await startQuiz(retrySettings)
+    if (didStart) navigate("/quiz", { replace: true })
   }
 
   const handleLogout = async () => {

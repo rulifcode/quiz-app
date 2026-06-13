@@ -20,15 +20,17 @@ export default function useQuizSession() {
   }, [status, tickTimer])
 
   const currentQuestion = useMemo(() => questions[currentIndex] ?? null, [questions, currentIndex])
-  const isLastQuestion = currentIndex === questions.length - 1
+  const answeredCount = answersCount(quizState.answers)
 
   return {
     answerQuestion,
+    answeredCount,
     currentIndex,
     currentQuestion,
-    isLastQuestion,
     questions,
     status,
     timeLeft,
   }
 }
+
+const answersCount = (answers) => answers.filter((answer) => answer !== undefined).length

@@ -1,11 +1,14 @@
+import logoQuizzy from "../../assets/logo_quizzy.png"
+
 export default function LoginHeader() {
   return (
-    <div className="mb-8 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sm font-black text-white">
-        QZ
-      </div>
-      <h1 className="text-2xl font-semibold tracking-tight text-white">Quizzy</h1>
-      <p className="mt-2 text-sm text-slate-400">Masuk untuk mulai mengerjakan kuis</p>
+    <div className="mb-8">
+      <img src={logoQuizzy} alt="Quizzy" className="mb-6 h-16 w-auto object-contain" />
+      <p className="text-sm font-semibold uppercase text-sky-700">Welcome back</p>
+      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Masuk ke Quizzy</h1>
+      <p className="mt-4 text-sm leading-7 text-slate-600">
+        Gunakan akun Google untuk mulai kuis, menyimpan sesi, dan mencatat skor.
+      </p>
     </div>
   )
 }
