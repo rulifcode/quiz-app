@@ -475,15 +475,6 @@ npm run preview
 | `npm run lint` | Mengecek kualitas kode dengan ESLint |
 | `npm run preview` | Preview hasil build production |
 
-## Catatan Demo
-
-Untuk kebutuhan video demo, gunakan [DEMO_SCRIPT.md](./DEMO_SCRIPT.md). File tersebut berisi:
-
-- Urutan halaman yang perlu didemokan.
-- Checklist semua kriteria challenge.
-- Naskah kata-kata presentasi.
-- Alur demo menggunakan Loom.
-
 ## Author
 
 Rulif Adrian
