@@ -11,7 +11,6 @@ Project ini dibuat untuk memenuhi challenge:
 5. Memilik  i mekanisme resume kuis saat browser ditutup.
 6. Mengupload source code ke GitHub.
 
-Dokumen tambahan untuk persiapan video demo ada di [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
 
 ## Fitur Utama
 
