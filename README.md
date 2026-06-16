@@ -476,7 +476,7 @@ npm run preview
 
 ## Author
 
-Rulif Adrian
+Rulif Fadria Nirwansyah
 
 - Instagram: https://www.instagram.com/ruliffadrian/
 - LinkedIn: https://www.linkedin.com/in/ruliffadrian/
